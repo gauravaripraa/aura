@@ -19,7 +19,7 @@ export const ProductGrid = ({
   selectedIds,
   onToggleProduct,
   isLoading,
-  maxSelection = 4,
+  maxSelection = 5,
 }: ProductGridProps) => {
   if (isLoading) {
     return (

@@ -21,7 +21,7 @@ export const SelectedProducts = ({ products, onRemove, onClear }: SelectedProduc
       <div className="flex justify-between items-center mb-3">
         <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
           <Sparkles size={20} className="text-purple-600" />
-          Selected Products ({products.length}/4)
+          Selected Products ({products.length}/5)
         </h3>
         <button
           onClick={onClear}

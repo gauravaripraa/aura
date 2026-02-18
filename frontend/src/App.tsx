@@ -10,7 +10,6 @@ import {
   CategoryFilter,
   ProductGrid,
   SelectedProducts,
-  StylePresets,
   GeneratedImage,
 } from './components';
 import { StyledRoomsGallery } from './components/StyledRoomsGallery';
@@ -32,11 +31,7 @@ function App() {
   // Selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-  // Styling state
-  const [mood, setMood] = useState('cozy');
-  const [style, setStyle] = useState('modern');
-  const [colorTheme, setColorTheme] = useState('neutral');
-  const [roomType, setRoomType] = useState('living room');
+  // Model quality state
   const [modelQuality, setModelQuality] = useState<'fast' | 'high'>('fast');
 
   // Generated image state
@@ -68,7 +63,7 @@ function App() {
       const next = new Set(prev);
       if (next.has(productId)) {
         next.delete(productId);
-      } else if (next.size < 4) {
+      } else if (next.size < 5) {
         next.add(productId);
       }
       return next;
@@ -98,10 +93,6 @@ function App() {
     try {
       const result = await generateMutation.mutateAsync({
         product_ids: Array.from(selectedIds),
-        mood,
-        style,
-        color_theme: colorTheme,
-        room_type: roomType,
         model_quality: modelQuality,
       });
 
@@ -245,7 +236,7 @@ function App() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold flex items-center gap-2 text-gray-900">
               <span className="bg-purple-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm">2</span>
-              Select Products (max 4)
+              Select Products (max 5)
             </h2>
             
             {/* Active filters display */}
@@ -286,31 +277,46 @@ function App() {
             selectedIds={selectedIds}
             onToggleProduct={handleToggleProduct}
             isLoading={isLoadingProducts}
-            maxSelection={4}
+            maxSelection={5}
           />
         </section>
 
-        {/* Section 3: Styling Options */}
+        {/* Section 3: Generate Image */}
         <section>
           <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-gray-900">
             <span className="bg-purple-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm">3</span>
-            Choose Styling Options
+            Generate Styled Image
           </h2>
-          <StylePresets
-            mood={mood}
-            style={style}
-            colorTheme={colorTheme}
-            roomType={roomType}
-            modelQuality={modelQuality}
-            onMoodChange={setMood}
-            onStyleChange={setStyle}
-            onColorThemeChange={setColorTheme}
-            onRoomTypeChange={setRoomType}
-            onModelQualityChange={setModelQuality}
-          />
+          
+          <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+            {/* Model quality toggle */}
+            <div className="flex items-center gap-4 mb-6">
+              <span className="text-sm font-medium text-gray-700">Quality:</span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setModelQuality('fast')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    modelQuality === 'fast'
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Fast
+                </button>
+                <button
+                  onClick={() => setModelQuality('high')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    modelQuality === 'high'
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  High Quality
+                </button>
+              </div>
+            </div>
 
-          {/* Generate button */}
-          <div className="mt-4">
+            {/* Generate button */}
             <button
               onClick={handleGenerate}
               disabled={selectedIds.size === 0 || generateMutation.isPending}

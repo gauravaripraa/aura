@@ -84,10 +84,10 @@ export interface StylingPlan {
 
 export interface GenerateStyleRequest {
   product_ids: string[];
-  mood: string;
-  style: string;
-  color_theme: string;
-  room_type: string;
+  mood?: string;
+  style?: string;
+  color_theme?: string;
+  room_type?: string;
   model_quality: 'fast' | 'high';
 }
 

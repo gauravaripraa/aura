@@ -73,7 +73,7 @@ class FilterRequest(BaseModel):
 
 class GenerateStyleRequest(BaseModel):
     """Request model for style generation."""
-    product_ids: list[str] = Field(..., min_length=1, max_length=4)
+    product_ids: list[str] = Field(..., min_length=1, max_length=5)
     mood: str = "cozy"
     style: str = "modern"
     color_theme: str = "neutral"
@@ -83,7 +83,7 @@ class GenerateStyleRequest(BaseModel):
 
 class RegenerateRequest(BaseModel):
     """Request model for image regeneration with feedback."""
-    product_ids: list[str] = Field(..., min_length=1, max_length=4)
+    product_ids: list[str] = Field(..., min_length=1, max_length=5)
     previous_plan: dict
     feedback: str
     model_quality: Literal["fast", "high"] = "fast"

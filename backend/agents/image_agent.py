@@ -98,7 +98,7 @@ def generate_styled_image(
     product_images: list[bytes],
     product_details: list[dict],
     model_quality: Literal["fast", "high"] = "fast",
-    aspect_ratio: str = "16:9",
+    aspect_ratio: str = "4:3",  # Closest to 12x10ft (6:5)
 ) -> dict:
     """
     Generate a styled image featuring all provided products using Gemini.
@@ -110,47 +110,55 @@ def generate_styled_image(
         product_images: List of product image bytes to include in the scene
         product_details: List of product dictionaries with metadata
         model_quality: "fast" or "high"
-        aspect_ratio: Image aspect ratio
+        aspect_ratio: Image aspect ratio (4:3 = ~12x10ft)
         
     Returns:
         dict with generated image as base64 and metadata
     """
     client = get_genai_client()
     
-    # Select model based on quality preference
-    if model_quality == "high":
-        model_name = "gemini-2.0-flash-exp"
-    else:
-        model_name = "gemini-2.0-flash-preview-image-generation"
+    # Use gemini-2.0-flash-image for image generation with reference images
+    model_name = "gemini-2.5-flash-image"
     
     # Build detailed product reference prompt
     product_ref_prompt = build_product_reference_prompt(product_details)
     
-    # Create enhanced prompt with strong image preservation instructions
-    enhanced_prompt = f"""CRITICAL IMAGE GENERATION TASK:
+    # Count of products for emphasis
+    product_count = len(product_images)
+    
+    # Enhanced quality instructions for "high" mode
+    quality_instructions = ""
+    if model_quality == "high":
+        quality_instructions = """
+=== HIGH QUALITY REQUIREMENTS ===
+- Ultra-high resolution with crisp details on all products
+- Professional interior photography lighting (soft diffused natural light)
+- Accurate material rendering: fabric textures, wood grain, metal reflections
+- Depth of field with products in sharp focus
+- Magazine-quality composition and styling
+"""
+    
+    # Create a simple, product-focused prompt with strong emphasis on ALL products
+    enhanced_prompt = f"""IMAGE GENERATION TASK - EXACT PRODUCT PLACEMENT:
 
-You are creating a photorealistic interior design photograph. You MUST use the EXACT products shown in the reference images I'm providing. DO NOT generate similar-looking products - use THESE SPECIFIC products with their exact appearance, colors, textures, and proportions.
+IMPORTANT: You are provided with {product_count} reference product images. You MUST include ALL {product_count} products in the generated image. DO NOT skip any product.
+
+Create a clean, well-lit interior room photograph (12ft x 10ft room size) that showcases ALL {product_count} EXACT products from the reference images.
 
 {product_ref_prompt}
+{quality_instructions}
+CRITICAL REQUIREMENTS:
+1. INCLUDE ALL {product_count} PRODUCTS - Every single reference image product must appear in the final image
+2. USE THE EXACT PRODUCTS from the reference images - do NOT create new or similar products
+3. Each product must appear EXACTLY as shown in its reference image (same colors, patterns, textures, shapes)
+4. Place products in a simple, neutral room with white/light grey walls and natural lighting
+5. All {product_count} products must be clearly visible and recognizable
+6. Use realistic proportions based on product dimensions
+7. The room should be approximately 12ft x 10ft in scale
 
-=== SCENE REQUIREMENTS ===
-{scene_prompt}
+MANDATORY: The final image MUST contain exactly {product_count} products - one for each reference image provided. Do NOT omit any product.
 
-=== CRITICAL INSTRUCTIONS ===
-1. PRESERVE EXACT PRODUCT APPEARANCE: Each product in the generated scene MUST look IDENTICAL to its reference image - same colors, patterns, textures, materials, and design details.
-2. PROPER SCALE: Use the provided dimensions to ensure products are correctly scaled relative to each other and the room.
-3. REALISTIC PLACEMENT: Position products naturally within the room setting as they would be used in real life.
-4. ALL PRODUCTS VISIBLE: Every provided product MUST be clearly visible and recognizable in the final image.
-5. PHOTOREALISTIC QUALITY: Generate a high-quality interior photography image suitable for e-commerce.
-6. NATURAL LIGHTING: Use soft, natural lighting that shows product details clearly.
-
-DO NOT:
-- Generate products that only look "similar" to the references
-- Alter the colors, patterns, or textures of the products
-- Hide or obscure any of the products
-- Change the fundamental design of any product
-
-The final image should look like a professional interior design photograph where someone has arranged THESE EXACT PRODUCTS in a styled room setting."""
+OUTPUT: A photorealistic interior photograph featuring ALL {product_count} exact products arranged naturally in the room."""
 
     # Build the content parts: product images + prompt
     content_parts = []
@@ -226,10 +234,8 @@ def generate_image_text_only(
     """
     client = get_genai_client()
     
-    if model_quality == "high":
-        model_name = "gemini-2.0-flash-exp"
-    else:
-        model_name = "gemini-2.0-flash-preview-image-generation"
+    # Use gemini-2.0-flash-image for text-to-image generation
+    model_name = "gemini-2.0-flash-image"
     
     products_text = "\n".join([f"- {desc}" for desc in product_descriptions])
     full_prompt = f"""{scene_prompt}

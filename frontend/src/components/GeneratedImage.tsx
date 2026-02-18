@@ -3,7 +3,7 @@
  */
 
 import { useState } from 'react';
-import { Download, RefreshCw, AlertCircle, CheckCircle } from 'lucide-react';
+import { Download, RefreshCw, AlertCircle } from 'lucide-react';
 import { LoadingSpinner } from './LoadingSpinner';
 import type { StylingPlan } from '../types';
 
@@ -105,31 +105,6 @@ export const GeneratedImage = ({
           <Download size={20} />
         </button>
       </div>
-
-      {/* Styling info */}
-      {stylingPlan && (
-        <div className="p-4 border-t border-gray-200">
-          <div className="flex items-center gap-2 text-green-600 mb-2">
-            <CheckCircle size={16} />
-            <span className="text-sm font-medium">Style Applied</span>
-          </div>
-          <p className="text-sm text-gray-700 mb-2">{stylingPlan.scene_description}</p>
-          <div className="flex flex-wrap gap-2">
-            <span className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded">
-              {stylingPlan.styling_parameters.mood}
-            </span>
-            <span className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded">
-              {stylingPlan.styling_parameters.style}
-            </span>
-            <span className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded">
-              {stylingPlan.styling_parameters.color_theme}
-            </span>
-            <span className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded">
-              {stylingPlan.styling_parameters.room_type}
-            </span>
-          </div>
-        </div>
-      )}
 
       {/* Feedback and regenerate */}
       <div className="p-4 border-t border-gray-200">
