@@ -3,7 +3,7 @@
  */
 
 import { useState } from 'react';
-import { Download, RefreshCw, AlertCircle, CheckCircle } from 'lucide-react';
+import { Download, RefreshCw, AlertCircle, CheckCircle, Plus } from 'lucide-react';
 import { LoadingSpinner } from './LoadingSpinner';
 import type { StylingPlan, GeneratedImageData } from '../types';
 
@@ -29,6 +29,7 @@ export const GeneratedImage = ({
   isRegenerating,
 }: GeneratedImageProps) => {
   const [feedback, setFeedback] = useState('');
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   // Use images array if available, otherwise fall back to single imageBase64
@@ -42,6 +43,31 @@ export const GeneratedImage = ({
     const img = displayImages[index];
     if (!img) return;
     
+    try {
+      // Convert base64 to blob for better browser compatibility
+      const byteCharacters = atob(imageBase64);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'image/png' });
+      
+      // Create download link
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `styled-room-${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up the URL object
+      setTimeout(() => URL.revokeObjectURL(url), 100);
+    } catch (error) {
+      console.error('Download failed:', error);
+      alert('Failed to download image. Please try again.');
+    }
     const link = document.createElement('a');
     link.href = `data:image/png;base64,${img.image_base64}`;
     link.download = `styled-room-${index + 1}.png`;
@@ -59,6 +85,13 @@ export const GeneratedImage = ({
       onRegenerate(feedback);
       setFeedback('');
     }
+  };
+
+  const handleAddToGallery = () => {
+    setShowSuccessMessage(true);
+    setTimeout(() => {
+      setShowSuccessMessage(false);
+    }, 3000);
   };
 
   if (isLoading) {
@@ -95,6 +128,16 @@ export const GeneratedImage = ({
 
   return (
     <div className="bg-white rounded-lg overflow-hidden border border-gray-200 shadow-sm">
+      {/* Success message */}
+      {showSuccessMessage && (
+        <div className="bg-green-50 border-b border-green-200 p-3 flex items-start gap-2">
+          <CheckCircle size={16} className="text-green-600 flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-green-800">
+            Added to styled gallery successfully
+          </p>
+        </div>
+      )}
+
       {/* Skipped products warning */}
       {skippedProducts && skippedProducts.length > 0 && (
         <div className="bg-yellow-50 border-b border-yellow-200 p-3 flex items-start gap-2">
@@ -152,6 +195,24 @@ export const GeneratedImage = ({
           className="w-full h-auto"
         />
         
+        {/* Action buttons overlay */}
+        <div className="absolute top-4 right-4 flex gap-2">
+          <button
+            onClick={handleAddToGallery}
+            className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg transition-colors shadow-md"
+            title="Add to styled gallery"
+          >
+            <Plus size={20} />
+            <span className="text-sm font-medium">Add to Styled Gallery</span>
+          </button>
+          <button
+            onClick={handleDownload}
+            className="bg-black/50 hover:bg-black/70 text-white p-2 rounded-lg transition-colors"
+            title="Download image"
+          >
+            <Download size={20} />
+          </button>
+        </div>
         {/* Download button overlay */}
         <button
           onClick={() => handleDownload(selectedImageIndex)}

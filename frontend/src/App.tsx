@@ -36,6 +36,7 @@ function App() {
 
   // Selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
 
   // Styling state
   const [mood, setMood] = useState('cozy');
@@ -104,16 +105,37 @@ function App() {
       const next = new Set(prev);
       if (next.has(productId)) {
         next.delete(productId);
-      } else if (next.size < 4) {
-        next.add(productId);
+        return next;
+      });
+      setSelectedProducts(prevProducts => 
+        prevProducts.filter(p => p.variation_id !== productId)
+      );
+    } else {
+      // Add product - need to find it in current filtered data
+      const product = productsData?.products.find(p => p.variation_id === productId);
+      if (!product) return;
+      
+      if (selectedIds.size < 4) {
+        setSelectedIds((prev) => {
+          const next = new Set(prev);
+          next.add(productId);
+          return next;
+        });
+        setSelectedProducts(prevProducts => {
+          // Prevent duplicates
+          if (prevProducts.some(p => p.variation_id === productId)) {
+            return prevProducts;
+          }
+          return [...prevProducts, product];
+        });
       }
-      return next;
-    });
+    }
   };
 
   // Clear selection
   const handleClearSelection = () => {
     setSelectedIds(new Set());
+    setSelectedProducts([]);
   };
 
   // Clear filters

@@ -26,7 +26,7 @@ def find_matching_products(
     for product in products:
         product_color = normalize_string(product.get("COLOR", ""))
         product_secondary_color = normalize_string(product.get("SECONDARYCOLOUR", ""))
-        product_primary_category = normalize_string(product.get("PRIMARY_CATEGORY", ""))
+        product_primary_category = normalize_string(product.get("CLASS_DESCRIPTION", ""))
         
         # Check if color matches (primary or secondary)
         color_match = (
@@ -51,7 +51,7 @@ def find_matching_products(
             if product in exact_matches:
                 continue
                 
-            product_primary_category = normalize_string(product.get("PRIMARY_CATEGORY", ""))
+            product_primary_category = normalize_string(product.get("CLASS_DESCRIPTION", ""))
             
             if (normalized_category in product_primary_category or 
                 product_primary_category in normalized_category):
@@ -89,7 +89,7 @@ def find_matching_products(
     # Extract required fields - just variation_id strings
     result = []
     for product in selected:
-        result.append(product.get("VARIATION_ID", ""))
+        result.append(product.get("variation_id", ""))
     
     return result
 
