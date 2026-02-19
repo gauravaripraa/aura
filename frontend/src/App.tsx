@@ -500,6 +500,7 @@ function App() {
             skippedProducts={skippedProducts}
             onRegenerate={handleRegenerate}
             isRegenerating={regenerateMutation.isPending}
+            selectedProducts={selectedProducts}
           />
         </section>
       </main>
